@@ -13,10 +13,11 @@ impl Hash {
         }
     }
 
-    pub fn from_slice(slice: &[u8]) -> Self {
+    pub fn from_array(array: [u8; 32]) -> Self {
         Hash {
-            data: Sha256::digest(Sha256::digest(slice)).into(),
+            data: array,
         }
+    }
 
     }
 
