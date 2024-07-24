@@ -1,11 +1,11 @@
-use sha2::{Sha256, Digest};
+use crate::hash::Hash;
 
 /// Models a block header
 #[derive(Debug)]
 pub struct BlockHeader {
     pub version: u32,
-    pub prev_block_hash: [u8; 32],
-    pub merkle_root: [u8; 32],
+    pub prev_block_hash: Hash,
+    pub merkle_root: Hash,
     pub timestamp: u32,
     pub target: u32,
     pub nonce: u32
@@ -16,8 +16,8 @@ impl BlockHeader {
     pub fn empty() -> Self {
         BlockHeader {
             version: 0,
-            prev_block_hash: [0; 32], // Stored bigendian
-            merkle_root: [0; 32],     // Stored big endian
+            prev_block_hash: Hash::new(), // Stored bigendian
+            merkle_root: Hash::new(),     // Stored big endian
             timestamp: 0,
             target: 0,
             nonce: 0,
@@ -42,12 +42,12 @@ impl BlockHeader {
         }
 
         // Process previous block hash
-        for (i, &byte) in self.prev_block_hash.iter().rev().enumerate() {
+        for (i, &byte) in self.prev_block_hash.as_slice().iter().rev().enumerate() {
             block_header[i + PREV_BLOCK_HASH_OFFSET] = byte;
         }
 
         // Process merkle root
-        for (i, &byte) in self.merkle_root.iter().rev().enumerate() {
+        for (i, &byte) in self.merkle_root.as_slice().iter().rev().enumerate() {
             block_header[i + MERKLE_ROOT_OFFSET] = byte;
         }
 
@@ -74,18 +74,8 @@ impl BlockHeader {
     }
 
     /// Compute the block header hash
-    pub fn compute_hash(&self) -> [u8; 32] {
-        fn reverse_bytes(array: &[u8; 32]) -> [u8; 32] {
-            let mut buffer: [u8; 32] = [0; 32];
-            for (i, &byte) in array.iter().rev().enumerate() {
-                buffer[i] = byte;
-            }
-            buffer
-        }
-
-        let block_hash: [u8; 32] = Sha256::digest(Sha256::digest(self.serialize())).into();
-        // The resulting hash is to be interpreted little endian...
-        reverse_bytes(&block_hash)
+    pub fn compute_hash(&self) -> Hash {
+        Hash::hash256(&self.serialize())
     }
 }
 
@@ -99,17 +89,16 @@ mod tests {
         // All zeros block
         let block_header = BlockHeader::empty();
         let block_hash = block_header.compute_hash();
-        // Hash computed using openssl, bytes reversed
-        assert_eq!(hex::encode(block_hash),
-                   "14508459b221041eab257d2baaa7459775ba748246c8403609eb708f0e57e74b");
+        assert_eq!(block_hash.to_string(),
+                   "4be7570e8f70eb093640c8468274ba759745a7aa2b7d25ab1e0421b259845014");
 
         // Real data from block 853620
         let prev_block_hash: [u8; 32] = <[u8; 32]>::try_from( hex::decode("00000000000000000002b47825cad9012456f6abbd707c793d3b09fef5ff6f05").unwrap().as_slice()).unwrap();
         let merkle_root: [u8; 32] = <[u8; 32]>::try_from( hex::decode("14939599c9406071ca4ed4683b1d226e5385178fbec3f61d77bac842c7224c3d").unwrap().as_slice()).unwrap();
         let block_header = BlockHeader {
             version: 0x24a30000,
-            prev_block_hash: prev_block_hash,
-            merkle_root: merkle_root,
+            prev_block_hash: Hash::from_array(prev_block_hash),
+            merkle_root: Hash::from_array(merkle_root),
             timestamp: 0x66a01e2d,
             target: 0x17036e3a,
             nonce: 0x949a1e1d,
@@ -118,7 +107,7 @@ mod tests {
         // Check serialization
         assert_eq!("0000a324056ffff5fe093b3d797c70bdabf6562401d9ca2578b4020000000000000000003d4c22c742c8ba771df6c3be8f1785536e221d3b68d44eca716040c9999593142d1ea0663a6e03171d1e9a94", block_header.to_string());
         // Check block hash
-        assert_eq!(hex::encode(block_header.compute_hash()), "00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37")
+        assert_eq!(block_header.compute_hash().to_le_string(), "00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37")
     }
 }
 
