@@ -1,7 +1,7 @@
 use sha2::{Sha256, Digest};
 
 /// Holds double sha256 hash data
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub struct Hash {
     data: [u8; 32], // Store big endian
 }
@@ -93,6 +93,7 @@ mod tests {
         assert_eq!(hash.to_le_string(), "00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37");
     }
 
+    #[test]
     fn test_from_hex_string() {
         let expected = Hash {
             data: [0x4f, 0x8b, 0x42, 0xc2, 0x2d, 0xd3, 0x72, 0x9b,
@@ -102,4 +103,20 @@ mod tests {
         };
         assert_eq!(Hash::from_hex_string("4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358").unwrap(), expected);
     }
+
+    #[test]
+    fn test_has_ord() {
+        let hash = Hash::new();
+        let difficulty = Hash::from_hex_string("0000ffff00000000000000000000000000000000000000000000000000000000").unwrap();
+        assert!(hash <= difficulty);
+
+        let hash = Hash::from_hex_string("00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37").unwrap();
+        assert!(hash <= difficulty);
+
+        let hash = Hash::from_hex_string("4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358").unwrap();
+        assert!(hash > difficulty);
+
+
+    }
+
 }
