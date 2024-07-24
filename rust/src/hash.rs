@@ -56,6 +56,15 @@ impl Hash {
         &self.data
     }
 
+    pub fn reverse(&self) -> Hash {
+        let mut buffer: [u8; 32] = [0; 32];
+        for (i, &byte) in self.data.iter().rev().enumerate() {
+            buffer[i] = byte;
+        }
+        Hash {
+            data: buffer,
+        }
+    }
 
 }
 
