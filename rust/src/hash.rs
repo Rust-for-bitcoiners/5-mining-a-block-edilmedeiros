@@ -28,6 +28,15 @@ impl Hash {
         }
     }
 
+    pub fn from_hex_string(hex: &str) -> Result<Hash, Box<dyn std::error::Error>> {
+        let data = hex::decode(hex)?;
+        let hash: [u8; 32] = <[u8; 32]>::try_from(data.as_slice())?;
+        Ok(
+            Hash {
+                data: hash,
+            })
+    }
+
     /// Convert to String, big endian
     pub fn to_string(&self) -> String {
         hex::encode(self.data)
@@ -82,5 +91,15 @@ mod tests {
         let block_header = hex::decode("0000a324056ffff5fe093b3d797c70bdabf6562401d9ca2578b4020000000000000000003d4c22c742c8ba771df6c3be8f1785536e221d3b68d44eca716040c9999593142d1ea0663a6e03171d1e9a94").unwrap();
         let hash = Hash::hash256(&block_header);
         assert_eq!(hash.to_le_string(), "00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37");
+    }
+
+    fn test_from_hex_string() {
+        let expected = Hash {
+            data: [0x4f, 0x8b, 0x42, 0xc2, 0x2d, 0xd3, 0x72, 0x9b,
+                   0x51, 0x9b, 0xa6, 0xf6, 0x8d, 0x2d, 0xa7, 0xcc,
+                   0x5b, 0x2d, 0x60, 0x6d, 0x05, 0xda, 0xed, 0x5a,
+                   0xd5, 0x12, 0x8c, 0xc0, 0x3e, 0x6c, 0x63, 0x58]
+        };
+        assert_eq!(Hash::from_hex_string("4f8b42c22dd3729b519ba6f68d2da7cc5b2d606d05daed5ad5128cc03e6c6358").unwrap(), expected);
     }
 }
