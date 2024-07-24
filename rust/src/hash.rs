@@ -1,7 +1,7 @@
 use sha2::{Sha256, Digest};
 
 /// Holds double sha256 hash data
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Hash {
     data: [u8; 32], // Store big endian
 }
