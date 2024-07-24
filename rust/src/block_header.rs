@@ -93,12 +93,10 @@ mod tests {
                    "4be7570e8f70eb093640c8468274ba759745a7aa2b7d25ab1e0421b259845014");
 
         // Real data from block 853620
-        let prev_block_hash: [u8; 32] = <[u8; 32]>::try_from( hex::decode("00000000000000000002b47825cad9012456f6abbd707c793d3b09fef5ff6f05").unwrap().as_slice()).unwrap();
-        let merkle_root: [u8; 32] = <[u8; 32]>::try_from( hex::decode("14939599c9406071ca4ed4683b1d226e5385178fbec3f61d77bac842c7224c3d").unwrap().as_slice()).unwrap();
         let block_header = BlockHeader {
             version: 0x24a30000,
-            prev_block_hash: Hash::from_array(prev_block_hash),
-            merkle_root: Hash::from_array(merkle_root),
+            prev_block_hash: Hash::from_hex_string("00000000000000000002b47825cad9012456f6abbd707c793d3b09fef5ff6f05").unwrap(),
+            merkle_root: Hash::from_hex_string("14939599c9406071ca4ed4683b1d226e5385178fbec3f61d77bac842c7224c3d").unwrap(),
             timestamp: 0x66a01e2d,
             target: 0x17036e3a,
             nonce: 0x949a1e1d,

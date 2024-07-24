@@ -90,8 +90,8 @@ mod tests {
                    "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
         // Programming Bitcoin example
-        let left = Hash::from_array(<[u8; 32]>::try_from(hex::decode("c117ea8ec828342f4dfb0ad6bd140e03a50720ece40169ee38bdc15d9eb64cf5").unwrap().as_slice()).unwrap());
-        let right = Hash::from_array(<[u8; 32]>::try_from(hex::decode("c131474164b412e3406696da1ee20ab0fc9bf41c8f05fa8ceea7a08d672d7cc5").unwrap().as_slice()).unwrap());
+        let left = Hash::from_hex_string("c117ea8ec828342f4dfb0ad6bd140e03a50720ece40169ee38bdc15d9eb64cf5").unwrap();
+        let right = Hash::from_hex_string("c131474164b412e3406696da1ee20ab0fc9bf41c8f05fa8ceea7a08d672d7cc5").unwrap();
         assert_eq!(merkle_parent(&left, &right).to_string(), "8b30c5ba100f6f2e5ad1e2a742e5020491240f8eb514fe97c713c31718ad7ecd");
     }
 
@@ -108,7 +108,7 @@ mod tests {
         let expected: Vec<Hash> = vec![
             "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
         assert_eq!(merkle_parent_level(hashes), expected);
 
@@ -119,7 +119,7 @@ mod tests {
         let expected: Vec<Hash> = vec![
             "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
         assert_eq!(merkle_parent_level(hashes), expected);
 
@@ -131,7 +131,7 @@ mod tests {
             "3d238a92a94532b946c90e19c49351c763696cff3db400485b813aecb8a13181",
             "10092f2633be5f3ce349bf9ddbde36caa3dd10dfa0ec8106bce23acbff637dae",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
 
         let result: Vec<Hash> = vec![
@@ -139,7 +139,7 @@ mod tests {
             "7f4e6f9e224e20fda0ae4c44114237f97cd35aca38d83081c9bfd41feb907800",
             "3ecf6115380c77e8aae56660f5634982ee897351ba906a6837d15ebc3a225df0",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
 
         assert_eq!(merkle_parent_level(hashes), result);
@@ -153,7 +153,7 @@ mod tests {
             "10092f2633be5f3ce349bf9ddbde36caa3dd10dfa0ec8106bce23acbff637dae",
             "10092f2633be5f3ce349bf9ddbde36caa3dd10dfa0ec8106bce23acbff637dae",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
 
         let result: Vec<Hash> = vec![
@@ -161,7 +161,7 @@ mod tests {
             "7f4e6f9e224e20fda0ae4c44114237f97cd35aca38d83081c9bfd41feb907800",
             "3ecf6115380c77e8aae56660f5634982ee897351ba906a6837d15ebc3a225df0",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
 
         assert_eq!(merkle_parent_level(hashes), result);
@@ -196,7 +196,7 @@ mod tests {
             "2e6d722e5e4dbdf2447ddecc9f7dabb8e299bae921c99ad5b0184cd9eb8e5908",
             "b13a750047bc0bdceb2473e5fe488c2596d7a7124b4e716fdd29b046ef99bbf0",
         ].iter().map(|h| {
-            Hash::from_array(<[u8; 32]>::try_from(hex::decode(h).unwrap().as_slice()).unwrap())
+            Hash::from_hex_string(h).unwrap()
         }).collect();
         assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_string(), "acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed6");
 
@@ -205,13 +205,9 @@ mod tests {
             "b1fea52486ce0c62bb442b530a3f0132b826c74e473d1f2c220bfa78111c5082",
             "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16",
         ].iter().map(|h| {
-            Hash::from_array(
-                <[u8; 32]>::try_from(
-                    hex::decode(h)
-                        .unwrap()
-                        .as_slice())
-                    .unwrap())
-                .reverse() // Blockchain data is expected to be little endian
+            Hash::from_hex_string(h)
+                .unwrap()
+                .reverse() // Blockchain data is expected to be little endien
         }).collect();
         assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_le_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
     }
