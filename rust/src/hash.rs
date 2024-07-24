@@ -39,6 +39,9 @@ impl Hash {
     pub fn as_slice(&self) -> &[u8] {
         &self.data
     }
+    pub fn as_mut_slice(&mut self) -> &[u8] {
+        &self.data
+    }
 }
 
 #[cfg(test)]
