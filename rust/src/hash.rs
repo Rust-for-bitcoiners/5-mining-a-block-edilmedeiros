@@ -19,6 +19,10 @@ impl Hash {
         }
     }
 
+    pub fn hash256(slice: &[u8]) -> Self {
+        Hash {
+            data: Sha256::digest(Sha256::digest(slice)).into(),
+        }
     }
 
     pub fn to_string(&self) -> String {
