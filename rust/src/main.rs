@@ -92,7 +92,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     block_header.target = 0x1f00ffff;
 
     // Grind block
-    block_header.nonce = 0;
+    let valid_block_header = block_header.grind().expect("Could not find valid nonce");
+    println!("Found block: {:?}", valid_block_header);
+    println!("Block hash: {}", valid_block_header.compute_hash().to_string());
 
 
 
@@ -109,7 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Output solution data
     let mut output_file = File::create("out.txt")?;
-    output_file.write(&block_header.to_string().as_bytes())?;
+    output_file.write(&valid_block_header.to_string().as_bytes())?;
     output_file.write(b"\n")?;
     output_file.write(coinbase.to_string().as_bytes())?;
     output_file.write(b"\n")?;
