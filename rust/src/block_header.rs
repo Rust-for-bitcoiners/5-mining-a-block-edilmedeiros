@@ -78,6 +78,20 @@ impl BlockHeader {
         Hash::hash256(&self.serialize())
     }
 
+    /// Grind nonce until we find a valid header
+    pub fn grind(mut self) -> Option<Self> {
+        let difficulty = self.difficulty();
+
+        for _ in 0..u32::MAX {
+            let block_hash = self.compute_hash().reverse();
+            if block_hash < difficulty {
+                return Some(self)
+            }
+            self.nonce = self.nonce.wrapping_add(1);
+        }
+        None // Could not find valid nonce
+    }
+
     fn difficulty(&self) -> Hash {
         let mut buffer: [u8; 32] = [0; 32];
         let digits = self.target.to_be_bytes();
@@ -126,6 +140,15 @@ mod tests {
         block_header.target = 0x1903a30c;
         let expected = Hash::from_hex_string("0000000000000003a30c00000000000000000000000000000000000000000000").unwrap();
         assert_eq!(block_header.difficulty(), expected);
+    }
+
+    #[test]
+    fn test_grind() {
+        let mut block_header = BlockHeader::empty();
+        block_header.target = 0x1f00ffff;
+        // Should be able to find a block pretty quickly!
+        let valid_block_header = block_header.grind().unwrap();
+        assert!(valid_block_header.compute_hash().reverse() < Hash::from_hex_string("0000ffff00000000000000000000000000000000000000000000000000000000").unwrap());
     }
 
 }
