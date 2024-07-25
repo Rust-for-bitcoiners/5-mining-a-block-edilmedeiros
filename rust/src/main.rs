@@ -84,8 +84,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Value should be zero for arbitrary data
     let coinbase_value_1 = Amount::ZERO;
 
-    // TODO: create script with required data
-    let output_script_1 = ScriptBuf::new();
+    // Commitment structure: BIP 141
+    let mut commitment_structure = String::new();
+    commitment_structure.push_str("6a24aa21a9ed");
+
+    let commitment_hash = Hash::new();
+    // TODO: Compute commitment hash
+    commitment_structure.push_str(&commitment_hash.to_string());
+    let output_script_1 = ScriptBuf::from_hex(&commitment_structure).unwrap();
 
     let txout_1 = TxOut {
         value: coinbase_value_1,
