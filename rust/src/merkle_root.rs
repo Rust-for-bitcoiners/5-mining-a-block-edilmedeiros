@@ -184,13 +184,13 @@ mod tests {
         // Single hash
         let mut hashes: Vec<Hash> = Vec::new();
         hashes.push(Hash::new());
-        assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
         // Double hashes are not duplicated. This will yield the same merkle root as above.
         let mut hashes: Vec<Hash> = Vec::new();
         hashes.push(Hash::new());
         hashes.push(Hash::new());
-        assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
         // Programming Bitcoin example
         let hashes: Vec<Hash> = vec![
@@ -209,7 +209,7 @@ mod tests {
         ].iter().map(|h| {
             Hash::from_hex_string(h).unwrap()
         }).collect();
-        assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_string(), "acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed6");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed6");
 
         // Data from block 170 (first bitcoin transaction)
         let hashes: Vec<Hash> = vec![
@@ -220,6 +220,6 @@ mod tests {
                 .unwrap()
                 .reverse() // Blockchain data is expected to be little endien
         }).collect();
-        assert_eq!(MerkleRoot::compute_merkle_root(hashes).to_le_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
     }
 }
