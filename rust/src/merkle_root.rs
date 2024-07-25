@@ -20,7 +20,7 @@ impl MerkleRoot {
     }
 
     /// Compute MerkleRoot from list of hashes
-    pub fn compute_merkle_root(hashes: Vec<Hash>) -> MerkleRoot {
+    pub fn compute_merkle_root(hashes: &Vec<Hash>) -> MerkleRoot {
         let mut buffer = hashes.clone();
 
         if buffer.len() == 1 {

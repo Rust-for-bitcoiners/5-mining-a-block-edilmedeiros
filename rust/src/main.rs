@@ -3,6 +3,7 @@ use bitcoin::consensus::Encodable;
 use bitcoin::transaction::Version;
 use week5_lib::hash::Hash;
 use week5_lib::block_header::BlockHeader;
+use week5_lib::merkle_root::MerkleRoot;
 
 use std::fs::File;
 use std::path::Path;
@@ -135,8 +136,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     block_header.prev_block_hash = Hash::from_hex_string("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f").unwrap();
 
     // Build merkle root from candidate transactions
-    //block_header.merkle_root = MerkleRoot::compute_merkle_root(candidate_txs);
-    block_header.merkle_root = Hash::new();
+    block_header.merkle_root = MerkleRoot::compute_merkle_root(&candidate_txids);
 
     // Timestamp with current time
     let timestamp = SystemTime::now()
