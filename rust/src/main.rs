@@ -118,6 +118,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = coinbase.consensus_encode(&mut coinbase_serialization);
     let coinbase_string = hex::encode(coinbase_serialization);
 
+    // Add coinbase txid to the block transactions list
+    let coinbase_txid = Hash::from_hex_string(&coinbase.compute_txid().to_string()).unwrap();
+    candidate_txids.insert(0, coinbase_txid);
 
     ////////////////////////
     // Build block header //
