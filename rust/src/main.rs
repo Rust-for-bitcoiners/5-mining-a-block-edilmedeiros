@@ -53,8 +53,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: script_sig data
     let coinbase_data = ScriptBuf::from_bytes("Mined by edilmedeiros".bytes().collect());
 
-    // TODO: witness
-    let coinbase_witness = Witness::new();
+    // Witness should have a 'witness reserved value': BIP 141. Since the BIP
+    // does not specify any values, using 32-byte array of zeros.
+    let coinbase_witness_data: Vec<[u8; 32]> = vec![[0; 32]];
+    let coinbase_witness = Witness::from_slice(&coinbase_witness_data);
 
     let txin = TxIn{
         previous_output: outpoint,
