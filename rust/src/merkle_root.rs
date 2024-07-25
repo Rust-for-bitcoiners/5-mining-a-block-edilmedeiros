@@ -19,6 +19,11 @@ impl MerkleRoot {
         }
     }
 
+    pub fn from_hex_string(hex: &str) -> Result<MerkleRoot, Box<dyn std::error::Error>> {
+        let data = Hash::from_hex_string(hex)?;
+        Ok(MerkleRoot { data, })
+    }
+
     /// Compute MerkleRoot from list of hashes
     pub fn compute_merkle_root(hashes: &Vec<Hash>) -> MerkleRoot {
         let mut buffer = hashes.clone();
