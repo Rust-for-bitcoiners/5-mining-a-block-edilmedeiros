@@ -1,11 +1,12 @@
 use crate::hash::Hash;
+use crate::merkle_root::MerkleRoot;
 
 /// Models a block header
 #[derive(Debug)]
 pub struct BlockHeader {
     pub version: u32,
     pub prev_block_hash: Hash,
-    pub merkle_root: Hash,
+    pub merkle_root: MerkleRoot,
     pub timestamp: u32,
     pub target: u32,
     pub nonce: u32
@@ -17,7 +18,7 @@ impl BlockHeader {
         BlockHeader {
             version: 0,
             prev_block_hash: Hash::new(), // Stored bigendian
-            merkle_root: Hash::new(),     // Stored big endian
+            merkle_root: MerkleRoot::new(),     // Stored big endian
             timestamp: 0,
             target: 0,
             nonce: 0,
