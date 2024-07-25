@@ -31,10 +31,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tx_file = File::open(tx_path)?;
     //let tx: Transaction = serde_json::from_reader(tx_file)?;
 
-    //println!("{tx:?}");
+    // TODO: Decide which transactions will enter the block
+    let mut candidate_txids: Vec<Hash> = Vec::new();
 
-    // Decide which transactions will enter the block
-    let candidate_txids: Vec<Hash> = Vec::new();
+    // To begin, let's include only the first transaction of the list
+    candidate_txids.push(Hash::from_hex_string("00000964b698b728022e6d180add7b2c060676e522ab2907f06198af7b2d0b99").unwrap());
 
     ////////////////////////////////
     // Build coinbase transaction //
@@ -120,7 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let coinbase_string = hex::encode(coinbase_serialization);
 
     // Add coinbase txid to the block transactions list
-    let coinbase_txid = Hash::from_hex_string(&coinbase.compute_txid().to_string()).unwrap();
+    let coinbase_txid = Hash::from_hex_string(&coinbase.compute_txid().to_string()).unwrap().reverse();
     candidate_txids.insert(0, coinbase_txid);
 
     ////////////////////////
