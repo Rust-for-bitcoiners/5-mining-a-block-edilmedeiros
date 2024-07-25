@@ -47,6 +47,12 @@ impl MerkleRoot {
     pub fn to_le_string(&self) -> String {
         self.data.to_le_string()
     }
+
+    /// Access the internal buffer
+    pub fn as_slice(&self) -> &[u8] {
+        &self.data.as_slice()
+    }
+
 }
 
 // Compute merkle parent from two hashes
