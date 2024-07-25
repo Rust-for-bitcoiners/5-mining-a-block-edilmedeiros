@@ -77,6 +77,18 @@ impl BlockHeader {
     pub fn compute_hash(&self) -> Hash {
         Hash::hash256(&self.serialize())
     }
+
+    fn difficulty(&self) -> Hash {
+        let mut buffer: [u8; 32] = [0; 32];
+        let digits = self.target.to_be_bytes();
+        let exponent = (digits[0] - 3) as usize;
+        // Todo: exponent requires proper error handling
+        let offset = 32 - exponent - 3;
+        for i in 0..3 {
+            buffer[offset + i] = digits[i + 1];
+        }
+        Hash::from_array(buffer)
+    }
 }
 
 
@@ -107,5 +119,13 @@ mod tests {
         // Check block hash
         assert_eq!(block_header.compute_hash().to_le_string(), "00000000000000000000d89e162692967cb3abc15715068d5b5d21937405ce37")
     }
-}
 
+    #[test]
+    fn test_difficulty() {
+        let mut block_header = BlockHeader::empty();
+        block_header.target = 0x1903a30c;
+        let expected = Hash::from_hex_string("0000000000000003a30c00000000000000000000000000000000000000000000").unwrap();
+        assert_eq!(block_header.difficulty(), expected);
+    }
+
+}
