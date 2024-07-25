@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let coinbase_sequence = Sequence(0xffff_ffff);
 
     // TODO: script_sig data
-    let coinbase_data = ScriptBuf::new();
+    let coinbase_data = ScriptBuf::from_bytes("Mined by edilmedeiros".bytes().collect());
 
     // TODO: witness
     let coinbase_witness = Witness::new();
