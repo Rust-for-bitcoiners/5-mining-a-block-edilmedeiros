@@ -4,10 +4,11 @@ use bitcoin::transaction::Version;
 use week5_lib::hash::Hash;
 use week5_lib::block_header::BlockHeader;
 use week5_lib::merkle_root::MerkleRoot;
+use week5_lib::transaction_proxy::TransactionProxy;
 
 use std::fs::File;
 use std::path::Path;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::str::FromStr;
 
@@ -18,7 +19,7 @@ use env_logger::Env;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize logger
-    env_logger::Builder::from_env(Env::default().default_filter_or("trace")).init();
+    env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
     //env_logger::init();
     log::info!("Mining a block - Chincode Labs Rust for Bitcoiners");
 
@@ -93,12 +94,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let coinbase_value_1 = Amount::ZERO;
 
     // Commitment structure: BIP 141
+    log::debug!("Building commitment hash structure");
+
+    let mut wtxid_list: Vec<Hash> = Vec::new();
+    log::debug!("Coinbase transaction wtxid: {}", Hash::new().to_string());
+    wtxid_list.push(Hash::new()); // wtxid of coinbase transaction is all zeros.
+
+    for hash in &candidate_txids {
+        log::debug!("Transaction: {}", hash.to_string());
+
+        // Compute wtxid for transaction and include in a list
+        let mut filepath = mempool_dir.join(hash.to_string());
+        filepath.set_extension("json");
+        log::trace!("Opening file: {}", filepath.display());
+        let mut tx_file = File::open(filepath)?;
+        let mut tx_data = String::new();
+        tx_file.read_to_string(&mut tx_data)?;
+        let tx: Transaction = serde_json::from_str::<TransactionProxy>(&tx_data)
+            .expect("failed to parse json data")
+            .transaction()
+            .expect("failed to parse hex string");
+        let wtxid = Hash::from_hex_string(&tx.compute_wtxid().to_string())?;
+        log::debug!("wtxid: {}", wtxid.to_string());
+        wtxid_list.push(wtxid.reverse());
+    }
+    let witness_root_hash = MerkleRoot::compute_merkle_root(&wtxid_list);
+    log::debug!("Witness root hash: {}", witness_root_hash.to_le_string());
+
+    let witness_reserved_value = Hash::new();
+    log::debug!("Witness reserved value: {}", witness_reserved_value.to_string());
+
+    let mut commitment_hash_preimage = String::new();
+    commitment_hash_preimage.push_str(&witness_root_hash.to_le_string());
+    commitment_hash_preimage.push_str(&witness_reserved_value.to_string());
+    log::debug!("Commitment hash preimage: {}", commitment_hash_preimage);
+    let commitment_hash_preimage = hex::decode(commitment_hash_preimage)?;
+    let commitment_hash = Hash::hash256(&commitment_hash_preimage);
+    log::debug!("Commitment hash: {}", commitment_hash.to_string());
+
     let mut commitment_structure = String::new();
     commitment_structure.push_str("6a24aa21a9ed");
-
-    let commitment_hash = Hash::new();
-    // TODO: Compute commitment hash
     commitment_structure.push_str(&commitment_hash.to_string());
+    log::debug!("Commitment structure: {}", commitment_structure);
     let output_script_1 = ScriptBuf::from_hex(&commitment_structure).unwrap();
 
     let txout_1 = TxOut {
@@ -126,12 +163,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = coinbase.consensus_encode(&mut coinbase_serialization);
     let coinbase_string = hex::encode(coinbase_serialization);
 
-    // Add coinbase txid to the block transactions list
+    // Add coinbase txid to the block transactions list.
+    //
+    // TODO: I'm also doing transaction parsing here to get the wtxids. This is
+    // not the best place to do it. Instead, do it when deciding which
+    // transactions will be included in the block since we will have to parse
+    // transactions there anyway.
+    log::debug!("Building list of transactions included in the block");
+    let mut txid_list: Vec<Hash> = Vec::new();
+
     let coinbase_txid = Hash::from_hex_string(&coinbase.compute_txid().to_string()).unwrap();
-    let mut tx_list: Vec<Hash> = Vec::new();
-    tx_list.push(coinbase_txid.clone().reverse());
+    log::debug!("Coinbase transaction txid: {}", coinbase_txid.to_string());
+    txid_list.push(coinbase_txid.clone().reverse());
+
     for hash in candidate_txids {
-        tx_list.push(hash.reverse());
+        log::debug!("Added: {}", hash.to_string());
+        txid_list.push(hash.clone().reverse());
     }
 
     ////////////////////////
@@ -148,7 +195,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     block_header.prev_block_hash = Hash::from_hex_string("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f").unwrap();
 
     // Build merkle root from candidate transactions
-    block_header.merkle_root = MerkleRoot::compute_merkle_root(&tx_list);
+    block_header.merkle_root = MerkleRoot::compute_merkle_root(&txid_list);
 
     // Timestamp with current time
     let timestamp = SystemTime::now()
@@ -176,7 +223,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     output_file.write(b"\n")?;
     output_file.write(coinbase_string.as_bytes())?;
     output_file.write(b"\n")?;
-    tx_list.iter().for_each(|txid| {
+    txid_list.iter().for_each(|txid| {
         output_file.write(txid.to_le_string().as_bytes()).unwrap();
         output_file.write(b"\n").unwrap();
     });
