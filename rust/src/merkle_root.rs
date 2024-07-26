@@ -44,7 +44,7 @@ impl MerkleRoot {
         }
         log::debug!("Finished merkle root computation");
         log::debug!("Resulting merkle root: {}", buffer[0].to_string());
-        MerkleRoot::from_hash(buffer[0].clone())
+        MerkleRoot::from_hash(buffer[0].clone().reverse())
     }
 
     /// Transfer ownership of the internal buffer
@@ -194,7 +194,7 @@ mod tests {
         let mut hashes: Vec<Hash> = Vec::new();
         hashes.push(Hash::new());
         hashes.push(Hash::new());
-        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
         // Programming Bitcoin example
         let hashes: Vec<Hash> = vec![
@@ -213,7 +213,7 @@ mod tests {
         ].iter().map(|h| {
             Hash::from_hex_string(h).unwrap()
         }).collect();
-        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed6");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed6");
 
         // Data from block 170 (first bitcoin transaction)
         let hashes: Vec<Hash> = vec![
@@ -224,7 +224,7 @@ mod tests {
                 .unwrap()
                 .reverse() // Blockchain data is expected to be little endien
         }).collect();
-        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
 
         // Data from block 1, single transaction
         let hashes: Vec<Hash> = vec![
@@ -234,7 +234,7 @@ mod tests {
                 .unwrap()
                 .reverse() // Blockchain data is expected to be little endien
         }).collect();
-        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098");
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098");
 
     }
 }
