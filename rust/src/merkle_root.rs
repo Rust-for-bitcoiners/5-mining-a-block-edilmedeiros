@@ -26,15 +26,24 @@ impl MerkleRoot {
 
     /// Compute MerkleRoot from list of hashes
     pub fn compute_merkle_root(hashes: &Vec<Hash>) -> MerkleRoot {
-        let mut buffer = hashes.clone();
-
-        if buffer.len() == 1 {
-            buffer.push(buffer[0].clone());
+        log::debug!("Computing merkle root");
+        log::trace!("List of hashes to process");
+        for hash in hashes {
+            log::trace!("{}", hash.to_string());
         }
+
+        let mut buffer = hashes.clone();
 
         while buffer.len() != 1 {
             buffer = merkle_parent_level(buffer);
+            log::trace!("Processed merkle tree level");
+            log::trace!("Resulting hashes");
+            for hash in &buffer {
+                log::trace!("{}", hash.to_string());
+            }
         }
+        log::debug!("Finished merkle root computation");
+        log::debug!("Resulting merkle root: {}", buffer[0].to_string());
         MerkleRoot::from_hash(buffer[0].clone())
     }
 
@@ -181,11 +190,6 @@ mod tests {
 
     #[test]
     fn test_merkle_root() {
-        // Single hash
-        let mut hashes: Vec<Hash> = Vec::new();
-        hashes.push(Hash::new());
-        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_string(), "e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
-
         // Double hashes are not duplicated. This will yield the same merkle root as above.
         let mut hashes: Vec<Hash> = Vec::new();
         hashes.push(Hash::new());
@@ -221,5 +225,16 @@ mod tests {
                 .reverse() // Blockchain data is expected to be little endien
         }).collect();
         assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff");
+
+        // Data from block 1, single transaction
+        let hashes: Vec<Hash> = vec![
+            "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098",
+        ].iter().map(|h| {
+            Hash::from_hex_string(h)
+                .unwrap()
+                .reverse() // Blockchain data is expected to be little endien
+        }).collect();
+        assert_eq!(MerkleRoot::compute_merkle_root(&hashes).to_le_string(), "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098");
+
     }
 }
