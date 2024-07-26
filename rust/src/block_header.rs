@@ -81,15 +81,23 @@ impl BlockHeader {
 
     /// Grind nonce until we find a valid header
     pub fn grind(mut self) -> Option<Self> {
+        log::debug!("Grinding proof of work");
+        log::debug!("Block data: {:?}", self);
+
         let difficulty = self.difficulty();
+        log::debug!("Difficulty: {}", difficulty.to_string());
 
         for _ in 0..u32::MAX {
             let block_hash = self.compute_hash().reverse();
+            //log::trace!("Block hash: {}", block_hash.to_string());
             if block_hash < difficulty {
                 return Some(self)
             }
             self.nonce = self.nonce.wrapping_add(1);
+            //log::trace!("trying new nonce: {}", self.nonce);
         }
+
+        log::debug!("Couldn't find valid block hash");
         None // Could not find valid nonce
     }
 

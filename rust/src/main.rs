@@ -13,8 +13,14 @@ use std::str::FromStr;
 
 use bitcoin::{Amount, OutPoint, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Txid, Witness};
 
+use env_logger::Env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+    // Initialize logger
+    env_logger::Builder::from_env(Env::default().default_filter_or("trace")).init();
+    //env_logger::init();
+    log::info!("Mining a block - Chincode Labs Rust for Bitcoiners");
 
     // Load mempool into memory
     let mempool_dir = Path::new("mempool");
@@ -40,9 +46,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ////////////////////////////////
     // Build coinbase transaction //
     ////////////////////////////////
+    log::info!("Building the coinbase transaction");
 
     // 1. Build the coinbase transaction input
-
     // Specific "spending" outpoint for the coinbase transaction
     let outpoint = OutPoint {
         txid: Txid::from_str("0000000000000000000000000000000000000000000000000000000000000000").unwrap(),
@@ -127,6 +133,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ////////////////////////
     // Build block header //
     ////////////////////////
+    log::info!("Building the block header");
     let mut block_header = BlockHeader::empty();
 
     // Version should be at least 4
@@ -151,11 +158,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     /////////////////
     // Grind block //
     /////////////////
+    log::info!("Grinding proof of work");
     let valid_block_header = block_header.grind().expect("Could not find valid nonce");
-    println!("Found block: {:?}", valid_block_header);
-    println!("Block hash: {}", valid_block_header.compute_hash().to_le_string());
+    log::debug!("Found block: {:?}", valid_block_header);
+    log::debug!("Block hash: {}", valid_block_header.compute_hash().to_le_string());
 
-    // Output solution data
+    //////////////////////////
+    // Output solution data //
+    //////////////////////////
+    log::info!("Writing data to out.txt file");
     let mut output_file = File::create("out.txt")?;
     output_file.write(&valid_block_header.to_string().as_bytes())?;
     output_file.write(b"\n")?;
@@ -165,6 +176,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         output_file.write(txid.to_string().as_bytes()).unwrap();
         output_file.write(b"\n").unwrap();
     });
-
+    log::info!("Finished. Bye!");
     Ok(())
 }
